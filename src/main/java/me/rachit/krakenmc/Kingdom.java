@@ -6,9 +6,9 @@ import java.util.UUID;
 
 public class Kingdom {
 
-    private String name;
-    private UUID owner;
-    private List<UUID> members;
+    private final String name;
+    private final UUID owner;
+    private final List<UUID> members;
 
     public Kingdom(String name, UUID owner) {
         this.name = name;
@@ -16,11 +16,19 @@ public class Kingdom {
         this.members = new ArrayList<>();
     }
 
-    public String getName() { return name; }
-    public UUID getOwner() { return owner; }
-    public List<UUID> getMembers() { return members; }
-
-
-
+    public String getName() {
+        return name;
     }
+
+    public UUID getOwner() {
+        return owner;
+    }
+
+    public List<UUID> getMembers() {
+        return members;
+    }
+
+
+}
+
 
