@@ -7,7 +7,7 @@ author: rxyc
 
 commands:
   kingdom:
-    usage: /kingdom create
-    description: creates your kingdom
+    usage: /kingdom help
+    description: list of working commands
 
 

@@ -5,6 +5,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.Bukkit;
+import java.util.UUID;
 
 public class KingdomCommand implements CommandExecutor {
 
@@ -37,6 +39,31 @@ public class KingdomCommand implements CommandExecutor {
                 player.sendMessage(ChatColor.YELLOW + "/kingdom help");
                 player.sendMessage(ChatColor.YELLOW + "/kingdom info");
 
+                return true;
+            }
+
+            if (args[0].equalsIgnoreCase("info")) {
+
+                String kingdomName = plugin.getPlayerKingdoms().get(player.getUniqueId());
+
+                if (kingdomName == null) {
+                    player.sendMessage(ChatColor.RED + "You are not in a kingdom");
+                    return true;
+                }
+
+                Kingdom kingdom = plugin.getKingdoms().get(kingdomName.toLowerCase());
+
+                player.sendMessage(ChatColor.RED + "===== Kingdom Info ====");
+                player.sendMessage(ChatColor.YELLOW + "Name: "
+                            + ChatColor.DARK_AQUA + kingdom.getName());
+
+                player.sendMessage(ChatColor.YELLOW + "Owner: "
+                        + ChatColor.DARK_AQUA
+                        + Bukkit.getOfflinePlayer(kingdom.getOwner()).getName());
+
+                player.sendMessage(ChatColor.YELLOW + "Members: "
+                        + ChatColor.DARK_AQUA
+                        + (kingdom.getMembers().size() + 1));
                 return true;
             }
 
