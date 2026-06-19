@@ -1,0 +1,13 @@
+name: KrakenKingdoms
+version: 1.0
+main: me.rachit.krakenmc.KingdomPlugin
+api-version: '1.21'
+description: A custom Kingdoms plugin built for SlothCole67
+author: rxyc
+
+commands:
+  kingdom:
+    usage: /kingdom <create|delete>
+    description: creates your kingdom
+
+
