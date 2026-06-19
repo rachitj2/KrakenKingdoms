@@ -10,6 +10,7 @@ public class KingdomPlugin extends JavaPlugin {
 
     private final Map<String, Kingdom> kingdoms = new HashMap<>();
     private final Map<UUID, String> playerKingdoms = new HashMap<>();
+    private final Map<UUID, String> pendingInvites = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -28,5 +29,9 @@ public class KingdomPlugin extends JavaPlugin {
 
     public Map<UUID, String> getPlayerKingdoms(){
         return playerKingdoms;
+    }
+
+    public Map<UUID, String> getPendingInvites() {
+        return pendingInvites;
     }
 }

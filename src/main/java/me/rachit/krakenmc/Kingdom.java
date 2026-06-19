@@ -1,6 +1,7 @@
 package me.rachit.krakenmc;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,7 +28,6 @@ public class Kingdom {
     public List<UUID> getMembers() {
         return members;
     }
-
 
 }
 

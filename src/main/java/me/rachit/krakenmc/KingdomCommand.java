@@ -6,7 +6,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.Bukkit;
-import java.util.UUID;
 
 public class KingdomCommand implements CommandExecutor {
 
@@ -24,6 +23,11 @@ public class KingdomCommand implements CommandExecutor {
                 return true;
             }
 
+
+            // ====================
+            // Kingdom Help
+            // ====================
+
             if (args.length == 0) {
                 player.sendMessage(ChatColor.RED + "/kingdom help");
                 return true;
@@ -38,9 +42,14 @@ public class KingdomCommand implements CommandExecutor {
                 player.sendMessage(ChatColor.YELLOW + "/kingdom members");
                 player.sendMessage(ChatColor.YELLOW + "/kingdom help");
                 player.sendMessage(ChatColor.YELLOW + "/kingdom info");
-
+                player.sendMessage(ChatColor.YELLOW + "/kingdom version");
                 return true;
             }
+
+
+            // ====================
+            // Kingdom Info
+            // ====================
 
             if (args[0].equalsIgnoreCase("info")) {
 
@@ -66,6 +75,86 @@ public class KingdomCommand implements CommandExecutor {
                         + (kingdom.getMembers().size() + 1));
                 return true;
             }
+
+
+            // ====================
+            // Kingdom Version
+            // ====================
+
+            if (args[0].equalsIgnoreCase("Version")) {
+                player.sendMessage(ChatColor.GOLD + "==== KrakenKingdoms ====");
+                player.sendMessage(ChatColor.YELLOW + "Version: "
+                        + ChatColor.DARK_AQUA + plugin.getDescription().getVersion());
+
+                player.sendMessage(ChatColor.YELLOW + "Author: "
+                        + ChatColor.DARK_AQUA + "Rxyc");
+                return true;
+
+            }
+
+            // ====================
+            // Kingdom Invite
+            // ====================
+
+            if (args[0].equalsIgnoreCase("invite")) {
+
+                String kingdomName = plugin.getPlayerKingdoms().get(player.getUniqueId());
+
+                if (kingdomName == null) {
+                    player.sendMessage(ChatColor.RED + "You are not in a kingdom!");
+                    return true;
+                }
+
+                Kingdom kingdom = plugin.getKingdoms().get(kingdomName.toLowerCase());
+
+                if (!kingdom.getOwner().equals(player.getUniqueId())) {
+                    player.sendMessage(ChatColor.RED + "Only the kingdom owner can invite players.");
+                    return true;
+                }
+
+                if (args.length < 2) {
+                    player.sendMessage(ChatColor.RED + "Usage: /kingdom invite <player>");
+                    return true;
+                }
+
+                Player target = Bukkit.getPlayer(args[1]);
+
+                if (target == null) {
+                    player.sendMessage((ChatColor.RED + "The player is not online."));
+                    return true;
+                }
+
+                if (plugin.getPlayerKingdoms().containsKey(target.getUniqueId())) {
+                    player.sendMessage(ChatColor.RED + "That player is already in a kingdom");
+                    return true;
+                }
+
+                plugin.getPendingInvites().put(target.getUniqueId(), kingdomName);
+
+                player.sendMessage(
+                        ChatColor.GREEN + "Invited "
+                        + ChatColor.YELLOW + target.getName()
+                        + ChatColor.GREEN + " to your Kingdom!"
+                );
+
+                target.sendMessage(
+                        ChatColor.GOLD + "You have been invited to join "
+                        + ChatColor.DARK_AQUA + kingdomName
+                );
+
+                target.sendMessage(
+                        ChatColor.YELLOW + "Use "
+                         + ChatColor.AQUA + "/kingdom join"
+                         + ChatColor.YELLOW + " to accept"
+                );
+
+                return true;
+            }
+
+
+            // ====================
+            // Kingdom Delete
+            // ====================
 
             if (args[0].equalsIgnoreCase("delete")) {
 
@@ -94,6 +183,12 @@ public class KingdomCommand implements CommandExecutor {
 
                 return true;
             }
+
+
+
+            // ====================
+            // Kingdom Create
+            // ====================
 
             if (!args[0].equalsIgnoreCase("create")) {
                 player.sendMessage(ChatColor.RED + "Unknown Command");
