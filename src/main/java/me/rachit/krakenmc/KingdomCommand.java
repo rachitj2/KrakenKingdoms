@@ -1,11 +1,16 @@
 package me.rachit.krakenmc;
 
+import net.md_5.bungee.api.ChatMessageType;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.Bukkit;
+
+import java.util.UUID;
+
+import static org.bukkit.Bukkit.getPlayer;
 
 public class KingdomCommand implements CommandExecutor {
 
@@ -43,6 +48,10 @@ public class KingdomCommand implements CommandExecutor {
                 player.sendMessage(ChatColor.YELLOW + "/kingdom help");
                 player.sendMessage(ChatColor.YELLOW + "/kingdom info");
                 player.sendMessage(ChatColor.YELLOW + "/kingdom version");
+                player.sendMessage(ChatColor.YELLOW + "/kingdom join");
+                player.sendMessage(ChatColor.YELLOW + "/kingdom promote <player>");
+                player.sendMessage(ChatColor.YELLOW + "/kingdom demote <player>");
+                player.sendMessage(ChatColor.YELLOW + "/kingdom leave");
                 return true;
             }
 
@@ -92,6 +101,7 @@ public class KingdomCommand implements CommandExecutor {
 
             }
 
+
             // ====================
             // Kingdom Invite
             // ====================
@@ -117,7 +127,7 @@ public class KingdomCommand implements CommandExecutor {
                     return true;
                 }
 
-                Player target = Bukkit.getPlayer(args[1]);
+                Player target = getPlayer(args[1]);
 
                 if (target == null) {
                     player.sendMessage((ChatColor.RED + "The player is not online."));
@@ -153,6 +163,200 @@ public class KingdomCommand implements CommandExecutor {
 
 
             // ====================
+            // Kingdom Join
+            // ====================
+
+            if (args[0].equalsIgnoreCase("join")) {
+
+                if (plugin.getPlayerKingdoms().containsKey(player.getUniqueId())) {
+                    player.sendMessage(ChatColor.RED + "You are already in a kingdom.");
+                    return true;
+                }
+
+                String kingdomName = plugin.getPendingInvites().get(player.getUniqueId());
+
+                if (kingdomName == null) {
+                    player.sendMessage(ChatColor.RED + "You do not have any pending kingdom invite");
+                    return true;
+                }
+
+                Kingdom kingdom = plugin.getKingdoms().get(kingdomName.toLowerCase());
+
+                if (kingdom == null) {
+                    player.sendMessage(ChatColor.RED + "That kingdom no longer exists");
+                    plugin.getPendingInvites().remove(player.getUniqueId());
+                    return true;
+                }
+
+                kingdom.getMembers().put(player .getUniqueId(), KingdomRank.MEMBER);
+
+                plugin.getPlayerKingdoms().put(player.getUniqueId(), kingdomName);
+
+                plugin.getPendingInvites().remove(player.getUniqueId());
+
+                player.sendMessage(
+                        ChatColor.GREEN + "You have joined "
+                         + ChatColor.DARK_AQUA + kingdomName
+                         + ChatColor.GREEN + "!"
+                );
+
+                return true;
+
+            }
+
+
+            // ====================
+            // Kingdom Promote
+            // ====================
+
+            if (args[0].equalsIgnoreCase("promote")) {
+
+                String kingdomName = plugin.getPlayerKingdoms().get(player.getUniqueId());
+
+                if (kingdomName == null) {
+                    player.sendMessage(ChatColor.RED + "You must be in a kingdom to run this command");
+                    return true;
+                }
+
+                Kingdom kingdom = plugin.getKingdoms().get(kingdomName.toLowerCase());
+
+                if (kingdom.getRank(player.getUniqueId()) != KingdomRank.OWNER) {
+                    player.sendMessage(ChatColor.RED + "You must be the owner to promote others");
+                    return true;
+                }
+
+                if (args.length < 2) {
+                    player.sendMessage(ChatColor.RED + "Usage: /kingdom promote <player>");
+                    return true;
+                }
+
+                Player target = Bukkit.getPlayer(args[1]);
+
+                if (target == null) {
+                    player.sendMessage(ChatColor.RED + "Player not found!");
+                    return true;
+                }
+
+                if (!kingdom.getMembers().containsKey(target.getUniqueId())) {
+                    player.sendMessage(ChatColor.RED + "That player is not in your kingdom.");
+                    return true;
+                }
+
+                if (kingdom.getRank(target.getUniqueId()) == KingdomRank.ADMIN) {
+                    player.sendMessage(ChatColor.RED + "That player is already an admin");
+                    return true;
+                }
+
+                kingdom.setRank(target.getUniqueId(), KingdomRank.ADMIN);
+
+                player.sendMessage(
+                        ChatColor.GREEN + "Promoted "
+                         + ChatColor.YELLOW + target.getName()
+                         + ChatColor.GREEN + " to Admin!"
+                );
+
+                target.sendMessage(
+                        ChatColor.GREEN + "You have been promoted to admin in "
+                         + ChatColor.DARK_AQUA + kingdom.getName()
+                );
+
+                return true;
+            }
+
+
+            // ====================
+            // Kingdom Demote
+            // ====================
+
+            if (args[0].equalsIgnoreCase("demote")) {
+
+                String kingdomName = plugin.getPlayerKingdoms().get(player.getUniqueId());
+
+                if (kingdomName == null) {
+                    player.sendMessage(ChatColor.RED + "You are not in a kingdom!");
+                    return true;
+                }
+
+                Kingdom kingdom = plugin.getKingdoms().get(kingdomName.toLowerCase());
+
+                if (kingdom.getRank(player.getUniqueId()) != KingdomRank.OWNER) {
+                    player.sendMessage(ChatColor.RED + "Only the owner can demote members.");
+                    return true;
+                }
+
+                if (args.length < 2) {
+                    player.sendMessage(ChatColor.RED + "Usage: /kingdom demote <player>");
+                    return true;
+                }
+
+                Player target = Bukkit.getPlayer(args[1]);
+
+                if (target == null) {
+                    player.sendMessage(ChatColor.RED + "Player not found.");
+                    return true;
+                }
+
+                if (!kingdom.getMembers().containsKey(target.getUniqueId())) {
+                    player.sendMessage(ChatColor.RED + "That player is not in your kingdom.");
+                    return true;
+                }
+
+                if (kingdom.getRank(target.getUniqueId()) != KingdomRank.ADMIN) {
+                    player.sendMessage(ChatColor.RED + "That player is not an admin.");
+                    return true;
+                }
+
+                kingdom.setRank(target.getUniqueId(), KingdomRank.MEMBER);
+
+                player.sendMessage(
+                        ChatColor.GREEN + "Demoted "
+                                + ChatColor.YELLOW + target.getName()
+                                + ChatColor.GREEN + " to Member."
+                );
+
+                target.sendMessage(
+                        ChatColor.RED + "You have been demoted to Member in "
+                                + ChatColor.DARK_AQUA + kingdom.getName()
+                );
+
+                return true;
+            }
+
+
+            // ====================
+            // Kingdom Leave
+            // ====================
+
+            if (args[0].equalsIgnoreCase("leave")) {
+
+                String kindomName = plugin.getPlayerKingdoms().get(player.getUniqueId());
+
+                if (kindomName ==null) {
+                    player.sendMessage(ChatColor.RED + "You are not in a kingdom");
+                    return true;
+                }
+
+                Kingdom kingdom = plugin.getKingdoms().get(kindomName.toLowerCase());
+
+                if (kingdom.getRank(player.getUniqueId()) == KingdomRank.OWNER) {
+                    player.sendMessage(
+                            ChatColor.RED + "Use /kingdom delete instead , owner cannot leave."
+                    );
+                    return true;
+                }
+
+                kingdom.getMembers().remove(player.getUniqueId());
+                plugin.getPlayerKingdoms().remove(player.getUniqueId());
+
+                player.sendMessage(
+                        ChatColor.GREEN + "You have left "
+                         + ChatColor.DARK_AQUA + kindomName
+                         + ChatColor.GREEN + "."
+                );
+                return true;
+            }
+
+            // ====================
             // Kingdom Delete
             // ====================
 
@@ -172,8 +376,11 @@ public class KingdomCommand implements CommandExecutor {
                     return true;
                 }
 
+                for (UUID member : kingdom.getMembers().keySet()) {
+                    plugin.getPlayerKingdoms().remove(member);
+                }
+
                 plugin.getKingdoms().remove(kingdomName.toLowerCase());
-                plugin.getPlayerKingdoms().remove(player.getUniqueId());
 
                 player.sendMessage(
                         ChatColor.RED + "Kingdom "
