@@ -1,11 +1,14 @@
 package me.rachit.krakenmc;
 
+import org.bukkit.Location;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class Kingdom {
 
+    private Location home;
+    private final Map<String, Location> warps = new HashMap<>();
     private final String name;
     private final UUID owner;
     private final Map<UUID, KingdomRank> members;
@@ -38,6 +41,17 @@ public class Kingdom {
         members.put(player, rank);
     }
 
+    public Location getHome() {
+        return home;
+    }
+
+    public void setHome(Location home) {
+        this.home = home;
+    }
+
+    public Map<String, Location> getWarps() {
+        return warps;
+    }
 }
 
 

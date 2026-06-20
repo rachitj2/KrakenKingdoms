@@ -5,6 +5,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.io.File;
 
 public class KingdomPlugin extends JavaPlugin {
 
@@ -14,8 +15,12 @@ public class KingdomPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        getLogger().info("KrakensMC plugin has been activated and sole is happy");
+
+        saveDefaultConfig();
+
+        getLogger().info("KrakenKingdom has been activated and sole is happy");
         getCommand("kingdom").setExecutor(new KingdomCommand(this));
+
     }
 
     @Override
