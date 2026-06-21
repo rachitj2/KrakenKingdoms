@@ -3,11 +3,17 @@ version: 1.0.3
 main: me.rachit.krakenmc.KingdomPlugin
 api-version: '1.21'
 description: A custom Kingdoms plugin built for SlothCole67
-author: rxyc
+author: Rachit
 
 commands:
   kingdom:
     usage: /kingdom help
     description: list of working commands
+  krakenpoints:
+    description: view ur kraken points
+    usage: /krakenpoints
+  kraken:
+    description: admin commands.
+
 
 

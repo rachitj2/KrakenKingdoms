@@ -8,6 +8,9 @@ import java.util.UUID;
 public class Kingdom {
 
     private Location home;
+    private int level;
+    private double damageBonus;
+    private final Map<String, Integer> upgrades;
     private final Map<String, Location> warps = new HashMap<>();
     private final String name;
     private final UUID owner;
@@ -15,6 +18,7 @@ public class Kingdom {
 
     public Kingdom(String name, UUID owner) {
         this.name = name;
+        this.upgrades = new HashMap<>();
         this.owner = owner;
         this.members = new HashMap<>();
 
@@ -51,6 +55,18 @@ public class Kingdom {
 
     public Map<String, Location> getWarps() {
         return warps;
+    }
+
+    public void setWarps(String name, Location location) {
+        warps.put(name.toLowerCase(), location);
+    }
+
+    public Location getWarps(String name) {
+        return warps.get(name.toLowerCase());
+    }
+
+    public void removeWarp(String name) {
+        warps.remove(name.toLowerCase());
     }
 }
 

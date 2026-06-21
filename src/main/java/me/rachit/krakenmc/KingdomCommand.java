@@ -6,6 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 
 import java.util.UUID;
 
@@ -33,10 +34,31 @@ public class KingdomCommand implements CommandExecutor {
     @Override
         public boolean onCommand(CommandSender sender, Command command, String label , String[] args) {
 
-            if (!(sender instanceof Player player)) {
-                sender.sendMessage(ChatColor.RED + "Only online players can run this command.");
-                return true;
-            }
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(ChatColor.RED + "Only online players can run this command.");
+            return true;
+        }
+
+        // ===================
+        // Kraken points
+        // ===================
+
+        if (command.getName().equalsIgnoreCase("krakenpoints")) {
+
+            int points = plugin.getKrakenPoints()
+                    .getOrDefault(player.getUniqueId(), 0);
+
+            player.sendMessage(
+                    ChatColor.GOLD + "===== Kraken points ===== "
+            );
+
+            player.sendMessage(
+                    ChatColor.YELLOW + "Balance: "
+                            + ChatColor.AQUA + points
+
+            );
+            return true;
+        }
 
 
             // ====================
@@ -110,6 +132,24 @@ public class KingdomCommand implements CommandExecutor {
                         + ChatColor.DARK_AQUA + "Rxyc");
                 return true;
 
+            }
+
+            // ===================
+            // Kingdom Points ( krakenpoints)
+            // ===================
+
+            if (command.getName().equalsIgnoreCase("krakenpoints")) {
+
+                int points = plugin.getKrakenPoints()
+                        .getOrDefault(player.getUniqueId(), 0);
+
+                player.sendMessage(
+                        ChatColor.AQUA + "You currently have "
+                         + ChatColor.GOLD + points
+                         + ChatColor.AQUA + " Kraken points"
+                );
+
+                return true;
             }
 
 
@@ -513,7 +553,7 @@ public class KingdomCommand implements CommandExecutor {
                 String kingdomName = plugin.getPlayerKingdoms().get(player.getUniqueId());
 
                 if (kingdomName == null) {
-                    player.sendMessage(ChatColor.RED + "You are not kin a kingdom.");
+                    player.sendMessage(ChatColor.RED + "You are not in a kingdom.");
                     return true;
                 }
 
@@ -535,6 +575,32 @@ public class KingdomCommand implements CommandExecutor {
                 return true;
 
             }
+
+            // ===================
+            // Kingdom DelHome
+            // ===================
+
+        if (args[0].equalsIgnoreCase("delhome")) {
+
+            String kingdomName = plugin.getPlayerKingdoms().get(player.getUniqueId());
+
+            if (kingdomName ==null) {
+                player.sendMessage(ChatColor.RED + "You are not in a kingdom");
+                return true;
+            }
+
+            Kingdom kingdom = plugin.getKingdoms().get(kingdomName.toLowerCase());
+
+            if (kingdom.getRank(player.getUniqueId()) != KingdomRank.OWNER) {
+                player.sendMessage(ChatColor.RED + "Only owner can delete homes");
+                return true;
+            }
+
+            kingdom.setHome(null);
+
+            player.sendMessage(ChatColor.GREEN + "Home has been deleted.");
+            return true;
+        }
 
 
             // ===================
@@ -570,6 +636,134 @@ public class KingdomCommand implements CommandExecutor {
                         delay * 20L
                 );
 
+                return true;
+            }
+
+            // ====================
+            // Kingdom Delwarp
+            // ====================
+
+            if (args[0].equalsIgnoreCase("delwarp")) {
+
+                if (args.length < 2) {
+                    player.sendMessage(ChatColor.RED + "Usage: /kingdom delwarp <name>");
+                    return true;
+                }
+
+                String kingdomName = plugin.getPlayerKingdoms().get(player.getUniqueId());
+
+                if (kingdomName ==null) {
+                    player.sendMessage(ChatColor.RED + "You must be in a kingdom to run this command");
+                    return true;
+                }
+                Kingdom kingdom = plugin.getKingdoms().get(kingdomName.toLowerCase());
+
+                if (kingdom.getRank(player.getUniqueId()) != KingdomRank.OWNER) {
+                    player.sendMessage(ChatColor.RED + "Only the owner can delete warps");
+                    return true;
+                }
+
+                String warpName = args[1].toLowerCase();
+
+                if (!kingdom.getWarps().containsKey(warpName)) {
+                    player.sendMessage(ChatColor.RED + "Warp does not exist.");
+                    return true;
+                }
+
+                kingdom.getWarps().remove(warpName);
+
+                player.sendMessage(ChatColor.GREEN + "Deleted the warp successfully!");
+                return true;
+            }
+
+
+            // ====================
+            // Kingdom SetWarp
+            // ====================
+
+            if (args[0].equalsIgnoreCase("setwarp")) {
+
+                String kingdomName = plugin.getPlayerKingdoms().get(player.getUniqueId());
+
+                if (kingdomName ==null) {
+                    player.sendMessage(ChatColor.RED + "You are not in a kingdom");
+                    return true;
+                }
+
+                Kingdom kingdom = plugin.getKingdoms().get(kingdomName.toLowerCase());
+                KingdomRank rank = kingdom.getRank(player.getUniqueId());
+
+                if (rank !=KingdomRank.OWNER && rank != KingdomRank.ADMIN) {
+                    player.sendMessage(ChatColor.RED + "You dont have permission to run this command");
+                    return true;
+                }
+
+                if (args.length < 2) {
+                    player.sendMessage(ChatColor.RED + "Usage: /kingdom setwarp <name>");
+                    return true;
+                }
+
+                int maxWarps = plugin.getConfig().getInt("max-warps");
+
+                if (!kingdom.getWarps().containsKey(args[1].toLowerCase())
+                    && kingdom.getWarps().size() >= maxWarps) {
+
+                    player.sendMessage(ChatColor.RED + "Your kingdom has reached the maximum number of warps");
+                    return true;
+                }
+
+                kingdom.setWarps(args[1], player.getLocation());
+
+                player.sendMessage(
+                        ChatColor.GREEN + "Warp "
+                         + ChatColor.YELLOW + args[1]
+                         + ChatColor.GREEN + " has been set to your current location!"
+
+                );
+                return true;
+
+            }
+
+            // ====================
+            // Kingdom Warp
+            // ====================
+
+            if (args[0].equalsIgnoreCase("warp")) {
+
+                String kingdomName = plugin.getPlayerKingdoms().get(player.getUniqueId());
+
+                if (kingdomName ==null) {
+                    player.sendMessage(ChatColor.RED + "You are not in a kingdom");
+                    return true;
+                }
+
+                if (args.length < 2) {
+                    player.sendMessage(ChatColor.RED + "Usage: /kingdsom warp <name>");
+                    return true;
+                }
+
+                Kingdom kingdom = plugin.getKingdoms().get(kingdomName.toLowerCase());
+
+                Location warp = kingdom.getWarps(args[1]);
+
+                if (warp ==null) {
+                    player.sendMessage(ChatColor.RED + "That warp does not exist.");
+                    return true;
+                }
+
+                int delay = plugin.getConfig().getInt("teleport.warp-delay");
+
+                player.sendMessage(
+                        ChatColor.YELLOW + "Teleporting in "
+                         + delay + " seconds..."
+
+                );
+
+                Bukkit.getScheduler().runTaskLater(
+                        plugin,
+                        () -> player.teleport(warp),
+                        delay * 20L
+                );
                 return true;
             }
 
