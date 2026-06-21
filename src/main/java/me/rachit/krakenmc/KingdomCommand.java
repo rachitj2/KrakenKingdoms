@@ -84,7 +84,13 @@ public class KingdomCommand implements CommandExecutor {
                 player.sendMessage(ChatColor.YELLOW + "/kingdom promote <player>");
                 player.sendMessage(ChatColor.YELLOW + "/kingdom demote <player>");
                 player.sendMessage(ChatColor.YELLOW + "/kingdom leave");
-                player.sendMessage(ChatColor.YELLOW + "/kingdom members");
+                player.sendMessage(ChatColor.YELLOW + "/kingdom sethome");
+                player.sendMessage(ChatColor.YELLOW + "/kingdom home");
+                player.sendMessage(ChatColor.YELLOW + "/kingdom delhome");
+                player.sendMessage(ChatColor.YELLOW + "/kingdom setwarp <name>");
+                player.sendMessage(ChatColor.YELLOW + "/kingdom delwarp <name>");
+                player.sendMessage(ChatColor.YELLOW + "/kingdom warp");
+                player.sendMessage(ChatColor.YELLOW + "/kingdom warps   ");
                 return true;
             }
 
@@ -764,6 +770,34 @@ public class KingdomCommand implements CommandExecutor {
                         () -> player.teleport(warp),
                         delay * 20L
                 );
+                return true;
+            }
+
+            // ====================
+            // Kingdom Warps
+            // ====================
+
+            if (args[0].equalsIgnoreCase("warps")) {
+
+                String kingdomName = plugin.getPlayerKingdoms().get(player.getUniqueId());
+
+                if (kingdomName ==null) {
+                    player.sendMessage(ChatColor.RED + "You are not in a kingdom");
+                    return true;
+                }
+
+                Kingdom kingdom = plugin.getKingdoms().get(kingdomName.toLowerCase());
+
+                if (kingdom.getWarps().isEmpty()) {
+                    player.sendMessage(ChatColor.RED + "Your kingdom has no warps");
+                    return true;
+                }
+
+                player.sendMessage(ChatColor.GOLD + "=== Kingdom Warps ===");
+
+                for (String warpName : kingdom.getWarps().keySet()) {
+                    player.sendMessage(ChatColor.YELLOW + "- " + warpName);
+                }
                 return true;
             }
 

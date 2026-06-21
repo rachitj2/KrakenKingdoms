@@ -2,7 +2,7 @@ package me.rachit.krakenmc;
 
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
-
+import org.bukkit.Location;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -117,10 +117,108 @@ public class KingdomPlugin extends JavaPlugin {
 
     public void saveKingdoms () {
 
+        getLogger().info("Kingdoms in memory: " + kingdoms.size());
+
+        kingdomsConfig.set("kingdoms", null);
+
+        for (Kingdom kingdom : kingdoms.values()) {
+
+            String path = "kingdoms." + kingdom.getName();
+
+            kingdomsConfig.set(path + ".owner",
+                    kingdom.getOwner().toString());
+
+            for (Map.Entry<UUID, KingdomRank> entry :
+                kingdom.getMembers().entrySet()) {
+
+                kingdomsConfig.set(
+                        path + ".members." + entry.getKey(),
+                        entry.getValue().name()
+                );
+            }
+
+            if (kingdom.getHome() !=null) {
+                kingdomsConfig.set(path + ".home",
+                        kingdom.getHome());
+
+            }
+
+            for (Map.Entry<String, Location> warp :
+                kingdom.getWarps().entrySet()) {
+
+                kingdomsConfig.set(
+                        path + ".warps." + warp.getKey(),
+                        warp.getValue()
+                );
+            }
+        }
+
+        try {
+            kingdomsConfig.save(kingdomsFiles);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public void loadKingdoms () {
+    public void loadKingdoms() {
 
+        if (!kingdomsConfig.contains("kingdoms")) {
+            return;
+        }
+
+        for (String kingdomName :
+                kingdomsConfig.getConfigurationSection("kingdoms").getKeys(false)) {
+
+            String path = "kingdoms." + kingdomName;
+
+            UUID owner = UUID.fromString(
+                    kingdomsConfig.getString(path + ".owner")
+            );
+
+            Kingdom kingdom = new Kingdom(kingdomName, owner);
+
+            if (kingdomsConfig.contains(path + ".members")) {
+
+                for (String uuidString :
+                        kingdomsConfig.getConfigurationSection(path + ".members").getKeys(false)) {
+
+                    UUID uuid = UUID.fromString(uuidString);
+
+                    KingdomRank rank = KingdomRank.valueOf(
+                            kingdomsConfig.getString(
+                                    path + ".members." + uuidString
+                            )
+                    );
+
+                    kingdom.setRank(uuid, rank);
+                    playerKingdoms.put(uuid, kingdomName.toLowerCase());
+                }
+            }
+
+            if (kingdomsConfig.contains(path + ".home")) {
+
+                Location home = kingdomsConfig.getLocation(path + ".home");
+                kingdom.setHome(home);
+            }
+
+            if (kingdomsConfig.contains(path + ".warps")) {
+
+                for (String warpName :
+                        kingdomsConfig.getConfigurationSection(path + ".warps").getKeys(false)) {
+
+                    Location warpLoc = kingdomsConfig.getLocation(
+                            path + ".warps." + warpName
+                    );
+
+                    kingdom.setWarps(warpName, warpLoc);
+                }
+            }
+
+            kingdoms.put(
+                    kingdomName.toLowerCase(),
+                    kingdom
+            );
+        }
     }
 
     public Map<String, Kingdom> getKingdoms(){
