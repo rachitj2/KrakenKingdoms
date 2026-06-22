@@ -16,6 +16,7 @@ public class KingdomPlugin extends JavaPlugin {
     private File playersFile;
     private FileConfiguration kingdomsConfig;
     private FileConfiguration playersConfig;
+    private final Map<UUID, Location> pendingTeleports = new HashMap<>();
     private final Map<String, Kingdom> kingdoms = new HashMap<>();
     private final Map<UUID, String> playerKingdoms = new HashMap<>();
     private final Map<UUID, String> pendingInvites = new HashMap<>();
@@ -47,6 +48,13 @@ public class KingdomPlugin extends JavaPlugin {
         getLogger().info("KrakenKingdom has been activated and sole is happy");
         getCommand("kingdom").setExecutor(new KingdomCommand(this));
         getCommand("krakenpoints").setExecutor(new KingdomCommand(this));
+        getCommand("kraken").setExecutor(new KingdomCommand(this));
+
+
+        getServer().getPluginManager().registerEvents(
+                new TeleportListener(this),
+                this
+        );
 
         int amount = getConfig().getInt("points.amount");
         long interval = getConfig().getLong("points.interval-minutes") * 60 * 20L;
@@ -235,5 +243,9 @@ public class KingdomPlugin extends JavaPlugin {
 
     public Map<UUID, Integer> getKrakenPoints() {
         return krakenPoints;
+    }
+
+    public Map<UUID, Location> getPendingTeleports() {
+        return pendingTeleports;
     }
 }

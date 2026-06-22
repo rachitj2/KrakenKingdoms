@@ -60,6 +60,56 @@ public class KingdomCommand implements CommandExecutor {
             return true;
         }
 
+        // =======================
+        // Kraken GivePoints ( admin )
+        // =======================
+
+        if (args[0].equalsIgnoreCase("givepoints")) {
+
+            if (!player.hasPermission("kraken.admin")) {
+                player.sendMessage(ChatColor.RED + "No permission");
+                return true;
+            }
+
+            if (args.length != 3) {
+                player.sendMessage(ChatColor.RED +
+                        "Usage: /kraken givepoints <player> <amount>");
+                return true;
+            }
+
+            Player target = Bukkit.getPlayer(args[1]);
+
+            if (target ==null) {
+                player.sendMessage(ChatColor.RED + "Player not found");
+                return true;
+            }
+
+            int amount;
+
+            try {
+                amount = Integer.parseInt(args[2]);
+            } catch (NumberFormatException e) {
+                player.sendMessage(ChatColor.RED + "Invalid number.");
+                return true;
+            }
+
+            plugin.getKrakenPoints().put(
+                    target.getUniqueId(),
+                    plugin.getKrakenPoints().getOrDefault(
+                            target.getUniqueId(),
+                            0
+                    ) + amount
+            );
+            player.sendMessage(ChatColor.GREEN +
+                    "Gave " + amount + " Kraken points to "
+                    + target.getName());
+
+            target.sendMessage(ChatColor.GOLD +
+                    "You received " + amount +
+                    " Kraken points!");
+            return true;
+        }
+
 
             // ====================
             // Kingdom Help
@@ -636,11 +686,29 @@ public class KingdomCommand implements CommandExecutor {
                          + delay + " seconds..."
                 );
 
-                Bukkit.getScheduler().runTaskLater(
-                        plugin,
-                        () -> player.teleport(kingdom.getHome()),
-                        delay * 20L
+                Location startLocation = player.getLocation();
+
+                plugin.getPendingTeleports().put(
+                        player.getUniqueId(),
+                        startLocation
                 );
+
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+
+                    Location original =
+                            plugin.getPendingTeleports().get(player.getUniqueId());
+
+                    if (original == null) {
+                        return;
+                    }
+
+                    player.teleport(kingdom.getHome());
+
+                    plugin.getPendingTeleports().remove(
+                            player.getUniqueId()
+                    );
+
+                }, delay * 20L);
 
                 return true;
             }
