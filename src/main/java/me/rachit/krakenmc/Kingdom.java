@@ -1,6 +1,8 @@
 package me.rachit.krakenmc;
 
 import org.bukkit.Location;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -9,6 +11,7 @@ public class Kingdom {
 
     private Location home;
     private int level;
+    private int ClaimBlocks;
     private double damageBonus;
     private final Map<String, Integer> upgrades;
     private final Map<String, Location> warps = new HashMap<>();
@@ -67,6 +70,22 @@ public class Kingdom {
 
     public void removeWarp(String name) {
         warps.remove(name.toLowerCase());
+    }
+
+    public int getClaimBlocks() {
+        return ClaimBlocks;
+    }
+
+    public void setClaimBlocks(int claimBlocks) {
+        this.ClaimBlocks = claimBlocks;
+    }
+
+    public double getDamageBonus() {
+        return damageBonus;
+    }
+
+    public void setDamageBonus(double damageBonus) {
+        this.damageBonus = damageBonus;
     }
 }
 

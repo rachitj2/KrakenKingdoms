@@ -145,6 +145,16 @@ public class KingdomPlugin extends JavaPlugin {
                 );
             }
 
+            kingdomsConfig.set(
+                    path + ".claimBlocks",
+                    kingdom.getClaimBlocks()
+            );
+
+            kingdomsConfig.set(
+                    path + ".damageBonus",
+                    kingdom.getDamageBonus()
+            );
+
             if (kingdom.getHome() !=null) {
                 kingdomsConfig.set(path + ".home",
                         kingdom.getHome());
@@ -196,6 +206,14 @@ public class KingdomPlugin extends JavaPlugin {
                             kingdomsConfig.getString(
                                     path + ".members." + uuidString
                             )
+                    );
+
+                    kingdom.setClaimBlocks(
+                            kingdomsConfig.getInt(path + ".claimBlocks")
+                    );
+
+                    kingdom.setDamageBonus(
+                            kingdomsConfig.getDouble(path + ".damageBonus")
                     );
 
                     kingdom.setRank(uuid, rank);

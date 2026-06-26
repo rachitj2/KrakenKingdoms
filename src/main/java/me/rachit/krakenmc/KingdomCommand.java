@@ -833,11 +833,29 @@ public class KingdomCommand implements CommandExecutor {
 
                 );
 
-                Bukkit.getScheduler().runTaskLater(
-                        plugin,
-                        () -> player.teleport(warp),
-                        delay * 20L
+                Location startLocation = player.getLocation();
+
+                plugin.getPendingTeleports().put(
+                        player.getUniqueId(),
+                        startLocation
                 );
+
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+
+                    Location original =
+                            plugin.getPendingTeleports().get(player.getUniqueId());
+
+                    if (original == null) {
+                        return;
+                    }
+
+                    player.teleport(warp);
+
+                    plugin.getPendingTeleports().remove(
+                            player.getUniqueId()
+                    );
+
+                }, delay * 20L);
                 return true;
             }
 
